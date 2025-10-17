@@ -12,21 +12,35 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
+      margin: 0;
     }
 
     #game {
-      width: 700px;
+      width: 800px;
       background: rgba(20, 20, 40, 0.85);
       border-radius: 16px;
       padding: 20px;
       box-shadow: 0 0 20px rgba(0,0,0,0.6);
+      text-align: center;
+    }
+
+    #character {
+      height: 260px;
+      margin-bottom: 20px;
+    }
+
+    #character img {
+      height: 100%;
+      border-radius: 12px;
+      box-shadow: 0 0 12px rgba(255,255,255,0.3);
+      transition: opacity 0.5s ease-in-out;
     }
 
     #dialogue {
-      margin: 20px 0;
       font-size: 18px;
       line-height: 1.6;
-      min-height: 120px;
+      min-height: 100px;
+      margin-bottom: 20px;
     }
 
     #choices {
@@ -52,15 +66,15 @@
 </head>
 <body>
   <div id="game">
-    <div id="scene">
-      <div id="dialogue"></div>
-    </div>
+    <div id="character"></div>
+    <div id="dialogue"></div>
     <div id="choices"></div>
   </div>
 
   <script>
     const dialogueBox = document.getElementById("dialogue");
     const choicesBox = document.getElementById("choices");
+    const characterBox = document.getElementById("character");
 
     let state = {
       affection: { elysia: 0, luna: 0, seraphia: 0 },
@@ -70,12 +84,12 @@
     const scenes = {
       intro: {
         text: "🌌 별빛이 흐르는 밤, 루미나스 아카데미의 종이 울린다. 당신의 이름은 '늘밤'. 하지만… 당신에겐 별의 조각이 없다.",
-        choices: [
-          { text: "계속...", next: "elysia_meet" }
-        ]
+        image: "nulbam",
+        choices: [{ text: "계속...", next: "elysia_meet" }]
       },
       elysia_meet: {
         text: "엘리시아: '당신이… 별 없는 신입생이군요?' 그녀의 눈빛이 차갑게 빛난다.",
+        image: "elysia",
         choices: [
           { text: "'그래, 뭐 어때?'", next: "elysia_choice1", affection: { elysia: 1 } },
           { text: "'…그런가요?'", next: "elysia_choice2", affection: { elysia: 2 } },
@@ -84,22 +98,27 @@
       },
       elysia_choice1: {
         text: "엘리시아: '자신감은 좋네요. 하지만 자만은 금물이에요.' [엘리시아 호감도 +1]",
+        image: "elysia",
         choices: [{ text: "다음", next: "next_day" }]
       },
       elysia_choice2: {
         text: "엘리시아: '괜찮아요, 저도 처음엔 두려웠으니까요.' 그녀는 부드럽게 미소 짓는다. [엘리시아 호감도 +2]",
+        image: "elysia",
         choices: [{ text: "다음", next: "next_day" }]
       },
       elysia_choice3: {
         text: "엘리시아: '무례하군요.' 그녀는 차갑게 돌아선다. [엘리시아 호감도 -1]",
+        image: "elysia",
         choices: [{ text: "다음", next: "next_day" }]
       },
       next_day: {
         text: "🔮 별빛이 흔들린다… 무언가가 깨어나는 기분이다. 다음 날, 당신은 어둠 속성 수업에서 신비한 소녀 루나와 마주친다.",
+        image: "luna",
         choices: [{ text: "계속", next: "end" }]
       },
       end: {
         text: "✨ To be continued... (2일차: 루나와의 만남)",
+        image: "seraphia",
         choices: []
       }
     };
@@ -108,9 +127,18 @@
       const scene = scenes[name];
       if (!scene) return;
 
+      // 텍스트 표시
       dialogueBox.textContent = scene.text;
       choicesBox.innerHTML = "";
 
+      // 캐릭터 이미지 표시
+      if (scene.image) {
+        characterBox.innerHTML = `<img src="images/${scene.image}.png" alt="${scene.image}">`;
+      } else {
+        characterBox.innerHTML = "";
+      }
+
+      // 선택지 표시
       scene.choices.forEach(choice => {
         const btn = document.createElement("button");
         btn.textContent = choice.text;
@@ -131,3 +159,4 @@
   </script>
 </body>
 </html>
+
