@@ -2,130 +2,835 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>늘밤의 연대기 : 별빛 아래의 서약</title>
+  <title>늘밤의 연대기 : 별빛 아래의 서약 (완결판)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
+    :root {
+      --bg: #0a0a1a;
+      --panel: rgba(20, 20, 40, 0.85);
+      --accent: #647cff;
+      --accent-2: #9aa7ff;
+      --text: #f0f0f0;
+      --muted: #cfd3ff;
+      --danger: #ff6b6b;
+      --shadow: 0 0 24px rgba(0,0,0,0.6);
+    }
+    * { box-sizing: border-box; }
     body {
-      background-color: #0a0a1a;
-      color: #f0f0f0;
-      font-family: "Noto Sans KR", sans-serif;
+      background: radial-gradient(1200px 800px at 15% 10%, rgba(255,255,255,0.06), transparent 50%),
+                  radial-gradient(900px 700px at 85% 20%, rgba(255,255,255,0.05), transparent 50%),
+                  var(--bg);
+      color: var(--text);
+      font-family: "Noto Sans KR", system-ui, -apple-system, Segoe UI, Roboto, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
+      min-height: 100vh;
       margin: 0;
+      padding: 24px;
     }
     #game {
-      width: 800px;
-      background: rgba(20, 20, 40, 0.85);
+      width: min(960px, 100%);
+      background: var(--panel);
       border-radius: 16px;
       padding: 20px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.6);
-      text-align: center;
+      box-shadow: var(--shadow);
+      display: grid;
+      grid-template-rows: auto auto 320px auto auto;
+      gap: 16px;
+    }
+    header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    h1 {
+      font-size: clamp(18px, 3vw, 24px);
+      margin: 0;
+      letter-spacing: 0.5px;
+    }
+    #episode {
+      font-size: 14px;
+      color: var(--muted);
     }
     #character {
       height: 320px;
-      margin-bottom: 20px;
-    }
-    #character img, #character video {
-      max-height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
       border-radius: 12px;
-      box-shadow: 0 0 12px rgba(255,255,255,0.3);
-      transition: opacity 0.5s ease-in-out;
+      background: rgba(255,255,255,0.03);
+      outline: 1px solid rgba(255,255,255,0.08);
+    }
+    #character img {
+      max-height: 100%;
+      max-width: 100%;
+      border-radius: 12px;
+      box-shadow: 0 0 12px rgba(255,255,255,0.2);
+      opacity: 0;
+      transform: scale(1.02);
+      transition: opacity .45s ease, transform .6s ease;
+    }
+    #character img.show {
+      opacity: 1;
+      transform: scale(1);
     }
     #dialogue {
+      position: relative;
+      min-height: 120px;
       font-size: 18px;
-      line-height: 1.6;
-      min-height: 100px;
-      margin-bottom: 20px;
-      white-space: pre-line;
+      line-height: 1.65;
+      background: rgba(255,255,255,0.04);
+      border-radius: 12px;
+      padding: 16px 18px;
+      outline: 1px solid rgba(255,255,255,0.06);
     }
     #choices {
-      display: flex;
-      flex-direction: column;
+      display: grid;
+      grid-template-columns: 1fr;
       gap: 10px;
     }
-    .choice-btn {
-      background: #3c3cff;
+    .choice-btn, .tool-btn {
+      background: linear-gradient(180deg, var(--accent), #465dff);
       color: white;
       border: none;
-      border-radius: 8px;
-      padding: 10px;
+      border-radius: 10px;
+      padding: 12px 14px;
       cursor: pointer;
-      transition: 0.2s;
+      transition: transform .06s ease, box-shadow .2s ease, filter .2s ease;
+      box-shadow: 0 4px 10px rgba(100,124,255,0.25);
+      font-size: 16px;
     }
-    .choice-btn:hover {
-      background: #6060ff;
+    .choice-btn:hover, .tool-btn:hover { filter: brightness(1.05); }
+    .choice-btn:active, .tool-btn:active { transform: translateY(1px); }
+    #toolbar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    #statusPanel {
+      display: none;
+      border-top: 1px dashed rgba(255,255,255,0.12);
+      padding-top: 10px;
+      font-size: 14px;
+    }
+    .meter {
+      display: grid;
+      grid-template-columns: 92px 1fr 42px;
+      gap: 8px;
+      align-items: center;
+      margin: 6px 0;
+    }
+    .meter .bar {
+      height: 10px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 999px;
+      overflow: hidden;
+      outline: 1px solid rgba(255,255,255,0.06);
+    }
+    .meter .fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent-2), var(--accent));
+      transition: width .3s ease;
+    }
+    .muted { color: var(--muted); }
+    .danger { color: var(--danger); }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; }
+    #footnote {
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      opacity: .9;
+    }
+    @media (min-width: 720px) {
+      #choices {
+        grid-template-columns: 1fr 1fr;
+      }
     }
   </style>
 </head>
 <body>
   <div id="game">
+    <header>
+      <div>
+        <h1>늘밤의 연대기 : 별빛 아래의 서약</h1>
+        <div id="episode" class="muted">Episode 1</div>
+      </div>
+      <div id="toolbar">
+        <button id="saveBtn" class="tool-btn">저장</button>
+        <button id="loadBtn" class="tool-btn">불러오기</button>
+        <button id="statusBtn" class="tool-btn">상태</button>
+        <button id="restartBtn" class="tool-btn">처음부터</button>
+      </div>
+    </header>
+
     <div id="character"></div>
     <div id="dialogue"></div>
     <div id="choices"></div>
+
+    <div id="statusPanel">
+      <div class="meter"><div>엘리시아</div><div class="bar"><div id="elysiaBar" class="fill"></div></div><div id="elysiaVal" class="mono">0</div></div>
+      <div class="meter"><div>루나</div><div class="bar"><div id="lunaBar" class="fill"></div></div><div id="lunaVal" class="mono">0</div></div>
+      <div class="meter"><div>세라피아</div><div class="bar"><div id="seraphiaBar" class="fill"></div></div><div id="seraphiaVal" class="mono">0</div></div>
+      <div class="muted">루트: <span id="routeVal">미정</span> · 깃발: <span id="flagsVal" class="mono">{} </span></div>
+    </div>
+
+    <div id="footnote">© 별빛 아래의 서약 — HTML/JS 미니 VN 엔진 (세이브/로드 지원)</div>
   </div>
 
   <script>
+    // ---------- Core Nodes ----------
     const dialogueBox = document.getElementById("dialogue");
     const choicesBox = document.getElementById("choices");
     const characterBox = document.getElementById("character");
+    const episodeEl = document.getElementById("episode");
+    const statusPanel = document.getElementById("statusPanel");
+    const elysiaBar = document.getElementById("elysiaBar");
+    const lunaBar = document.getElementById("lunaBar");
+    const seraphiaBar = document.getElementById("seraphiaBar");
+    const elysiaVal = document.getElementById("elysiaVal");
+    const lunaVal = document.getElementById("lunaVal");
+    const seraphiaVal = document.getElementById("seraphiaVal");
+    const routeVal = document.getElementById("routeVal");
+    const flagsVal = document.getElementById("flagsVal");
+    const saveBtn = document.getElementById("saveBtn");
+    const loadBtn = document.getElementById("loadBtn");
+    const statusBtn = document.getElementById("statusBtn");
+    const restartBtn = document.getElementById("restartBtn");
 
-    let state = { affection: { elysia: 0, luna: 0, seraphia: 0 } };
+    // ---------- State ----------
+    let state = {
+      affection: { elysia: 0, luna: 0, seraphia: 0 },
+      flags: {},              // 임의의 플래그 저장 (예: 계약수락, 도서관기록, 서약수행 등)
+      route: null,            // 'elysia' | 'luna' | 'solo'
+      scene: "E1_intro",
+      episode: 1,
+      typewriter: true
+    };
 
+    function resetState() {
+      state = {
+        affection: { elysia: 0, luna: 0, seraphia: 0 },
+        flags: {},
+        route: null,
+        scene: "E1_intro",
+        episode: 1,
+        typewriter: true
+      };
+      showScene(state.scene);
+    }
+
+    // ---------- Utils ----------
+    function setImage(key) {
+      characterBox.innerHTML = "";
+      if (!key) return;
+      const img = document.createElement("img");
+      img.src = `images/${key}.png`;
+      img.alt = key;
+      characterBox.appendChild(img);
+      // fade-in
+      requestAnimationFrame(() => img.classList.add("show"));
+    }
+
+    function setEpisode(num) {
+      episodeEl.textContent = `Episode ${num}`;
+    }
+
+    function typeText(text) {
+      // 간단 타이핑 효과
+      if (!state.typewriter) {
+        dialogueBox.textContent = text;
+        return;
+      }
+      dialogueBox.textContent = "";
+      let i = 0;
+      const speed = 15 + Math.random() * 10;
+      function step() {
+        dialogueBox.textContent = text.slice(0, i);
+        i++;
+        if (i <= text.length) {
+          setTimeout(step, speed);
+        }
+      }
+      step();
+    }
+
+    function updateStatus() {
+      const e = Math.max(0, Math.min(100, state.affection.elysia * 10));
+      const l = Math.max(0, Math.min(100, state.affection.luna * 10));
+      const s = Math.max(0, Math.min(100, state.affection.seraphia * 10));
+      elysiaBar.style.width = e + "%";
+      lunaBar.style.width = l + "%";
+      seraphiaBar.style.width = s + "%";
+      elysiaVal.textContent = state.affection.elysia;
+      lunaVal.textContent = state.affection.luna;
+      seraphiaVal.textContent = state.affection.seraphia;
+      routeVal.textContent = state.route ? state.route : "미정";
+      flagsVal.textContent = JSON.stringify(state.flags);
+    }
+
+    function applyAffection(aff) {
+      if (!aff) return;
+      for (const k in aff) {
+        if (state.affection[k] === undefined) continue;
+        state.affection[k] += aff[k];
+      }
+    }
+
+    function applyFlags(setFlag, unsetFlag) {
+      if (setFlag) for (const k in setFlag) state.flags[k] = setFlag[k];
+      if (unsetFlag) for (const k in unsetFlag) delete state.flags[k];
+    }
+
+    function saveGame() {
+      localStorage.setItem("nulbam_full_save", JSON.stringify(state));
+      flash("[저장 완료]");
+    }
+    function loadGame() {
+      const raw = localStorage.getItem("nulbam_full_save");
+      if (!raw) return flash("[저장 데이터가 없습니다]");
+      try {
+        const saved = JSON.parse(raw);
+        state = saved;
+        showScene(state.scene);
+        flash("[불러오기 완료]");
+      } catch (e) {
+        flash("[불러오기 실패]");
+      }
+    }
+    function flash(message) {
+      const el = document.createElement("div");
+      el.textContent = message;
+      el.style.position = "fixed";
+      el.style.bottom = "20px";
+      el.style.left = "50%";
+      el.style.transform = "translateX(-50%)";
+      el.style.background = "rgba(0,0,0,0.7)";
+      el.style.color = "#fff";
+      el.style.padding = "8px 12px";
+      el.style.borderRadius = "8px";
+      el.style.fontSize = "14px";
+      el.style.boxShadow = "0 6px 16px rgba(0,0,0,0.3)";
+      el.style.zIndex = "9999";
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 1200);
+    }
+
+    saveBtn.onclick = saveGame;
+    loadBtn.onclick = loadGame;
+    statusBtn.onclick = () => {
+      statusPanel.style.display = statusPanel.style.display === "none" ? "block" : "none";
+      updateStatus();
+    };
+    restartBtn.onclick = resetState;
+
+    // ---------- Scene Engine ----------
+    // 장면 구조: { text, image, choices: [{ text, next, affection?, setFlag?, unsetFlag?, setRoute?, goto?: 'ENDING'|'CHECK' }], episode? }
     const scenes = {
-      intro: {
-        text: "🌌 별빛이 흐르는 밤, 루미나스 아카데미의 종이 울린다. 당신의 이름은 '늘밤'.",
+      // --------- Episode 1: 별 없는 신입생 ---------
+      E1_intro: {
+        episode: 1,
         image: "nulbam",
-        choices: [{ text: "계속", next: "elysia_meet" }]
+        text:
+"🌌 별빛이 흐르는 밤, 루미나스 아카데미의 종이 울린다.\n모든 신입생이 ‘별의 조각’을 들어 보이지만, 당신의 손에는 아무것도 없다.\n\n이름: 늘밤. 그러나 — 당신에겐 ‘별’이 없다.",
+        choices: [{ text: "계속...", next: "E1_elysia_meet" }]
       },
-      elysia_meet: {
-        text: "엘리시아: '당신이… 별 없는 신입생이군요?'",
+      E1_elysia_meet: {
+        episode: 1,
         image: "elysia",
+        text:
+"엘리시아: \"당신이… 별 없는 신입생이군요?\"\n그녀의 눈빛은 얼음처럼 차갑지만, 그 속에 미묘한 호기심이 스친다.",
         choices: [
-          { text: "'그래, 뭐 어때?'", next: "ELY8_ritual" }
+          { text: "그래, 뭐 어때?", next: "E1_elysia_choice1", affection: { elysia: 1 } },
+          { text: "…그런가요?", next: "E1_elysia_choice2", affection: { elysia: 2 } },
+          { text: "신경 꺼줘.", next: "E1_elysia_choice3", affection: { elysia: -1 } }
         ]
       },
-      ELY8_ritual: {
-        episode: 8,
-        image: "elysia",
-        text: "빛의 의식이 시작된다. 맥박처럼 고른 호흡.\n엘리시아: '당신의 별, 함께 되찾아요.'",
-        video: "videos/rite_of_light.mp4",
+      E1_elysia_choice1: {
+        episode: 1, image: "elysia",
+        text: "엘리시아: \"자신감은 좋네요. 하지만 자만은 위험하답니다.\"",
+        choices: [{ text: "다음", next: "E1_reflection" }]
+      },
+      E1_elysia_choice2: {
+        episode: 1, image: "elysia",
+        text: "엘리시아: \"괜아요. 처음엔 누구나 두렵죠. 별의 빛은, 때로 스스로를 숨기기도 해요.\"",
+        choices: [{ text: "다음", next: "E1_reflection" }]
+      },
+      E1_elysia_choice3: {
+        episode: 1, image: "elysia",
+        text: "엘리시아: \"무례하군요… 하지만, 흥미롭기도 하네요.\"",
+        choices: [{ text: "다음", next: "E1_reflection" }]
+      },
+      E1_reflection: {
+        episode: 1, image: "nulbam",
+        text:
+"🔮 별 없는 밤은 유난히 조용하다. 그러나 하늘 한켠에서, 검은 빛이 깜박인다.\n‘검은 별’ — 그것이 날 바라보고 있다.",
+        choices: [{ text: "다음 날을 맞이한다", next: "E1_end" }]
+      },
+      E1_end: {
+        episode: 1, image: "nulbam",
+        text: "【1화 끝】\n내일, 어둠 속성 수업이 시작된다.",
+        choices: [{ text: "▶ 2화 시작", next: "E2_intro" }]
+      },
+
+      // --------- Episode 2: 어둠 속의 소녀 (루나) ---------
+      E2_intro: {
+        episode: 2, image: "luna",
+        text:
+"어둠 속성 실습실. 새벽보다 고요한 곳.\n루나: \"혹시… 당신도 별을 잃었나요?\"\n그녀의 목소리는 속삭임처럼 부드럽다.",
+        choices: [
+          { text: "고개를 끄덕인다.", next: "E2_luna_bond", affection: { luna: 2 } },
+          { text: "아니, 아직 찾는 중이야.", next: "E2_luna_bond", affection: { luna: 1 } },
+          { text: "말없이 피한다.", next: "E2_luna_distance", affection: { luna: -1 } }
+        ]
+      },
+      E2_luna_bond: {
+        episode: 2, image: "luna",
+        text:
+"루나: \"나도 그래요. 그래서 배웠어요, 빛은 어둠 옆에 있을 때 더 선명하다는 걸.\"",
+        choices: [{ text: "다음", next: "E2_shadow_hint" }]
+      },
+      E2_luna_distance: {
+        episode: 2, image: "luna",
+        text:
+"루나는 살짝 내려놓은 시선으로 당신을 떠본다.\n루나: \"그럼… 언젠가, 말해줘요. 너의 밤을.\"",
+        choices: [{ text: "다음", next: "E2_shadow_hint" }]
+      },
+      E2_shadow_hint: {
+        episode: 2, image: "luna",
+        text:
+"검은 별의 떨림이 다시 느껴진다. 루나는 속삭인다.\n\"금지된 도서관에서, 잃어버린 별 기록을 봤어요.\"",
+        choices: [{ text: "단서를 기억해 둔다", next: "E2_end", setFlag: { got_hint_library: true } }]
+      },
+      E2_end: {
+        episode: 2, image: "nulbam",
+        text: "【2화 끝】\n금지된 도서관… 그곳에 답이 있을까?",
+        choices: [{ text: "▶ 3화 시작", next: "E3_intro" }]
+      },
+
+      // --------- Episode 3: 별의 잔향 (대립의 씨앗) ---------
+      E3_intro: {
+        episode: 3, image: "elysia",
+        text:
+"엘리시아: \"루나와 가까워졌군요. 어둠의 속삭임은 달콤하죠. 그러나 빛은 단단함에서 비롯됩니다.\"\n두 사람 사이에 보이지 않는 긴장이 생겨난다.",
+        choices: [
+          { text: "엘리시아의 엄정함을 지지한다", next: "E3_side_elysia", affection: { elysia: 2 } },
+          { text: "루나의 공감에 기대선다", next: "E3_side_luna", affection: { luna: 2 } },
+          { text: "나는 내 길을 간다", next: "E3_side_solo" }
+        ]
+      },
+      E3_side_elysia: {
+        episode: 3, image: "elysia",
+        text: "엘리시아: \"선택에 책임을. 그게 별의 규율입니다.\"",
+        choices: [{ text: "다음", next: "E3_end" }]
+      },
+      E3_side_luna: {
+        episode: 3, image: "luna",
+        text: "루나: \"그래, 네 밤은 네 것이야. 난 네 곁을 지킬게.\"",
+        choices: [{ text: "다음", next: "E3_end" }]
+      },
+      E3_side_solo: {
+        episode: 3, image: "nulbam",
+        text: "나는 둘의 시선을 피하고, 검은 별을 떠올린다. 답은, 내 안에 있다.",
+        choices: [{ text: "다음", next: "E3_end" }]
+      },
+      E3_end: {
+        episode: 3, image: "nulbam",
+        text: "【3화 끝】\n잔향은 점점 더 선명해진다.",
+        choices: [{ text: "▶ 4화 시작", next: "E4_intro" }]
+      },
+
+      // --------- Episode 4: 금지된 도서관 ---------
+      E4_intro: {
+        episode: 4, image: "seraphia",
+        text:
+"금지된 도서관. 먼지 속에서 빛나는 기록.\n『별을 잃은 자는, 여신의 서고에서 자신을 찾는다.』",
+        choices: [
+          { text: "기록을 읽는다", next: "E4_record", setFlag: { library_read: true } },
+          { text: "책장을 넘기다 봉인을 푼다", next: "E4_seal", setFlag: { seal_touched: true } }
+        ]
+      },
+      E4_record: {
+        episode: 4, image: "seraphia",
+        text:
+"『검은 별의 눈동자는 시련을, 흰 별의 숨결은 서약을 부른다.』\n희미한 여신의 이름: 세라피아.",
+        choices: [{ text: "다음", next: "E4_end" }]
+      },
+      E4_seal: {
+        episode: 4, image: "seraphia",
+        text:
+"칙— 억눌려 있던 빛이 새어 나왔다.\n속삭임: 『나를 부르렴… 별의 여신, 세라피아.』",
+        choices: [{ text: "다음", next: "E4_end", setFlag: { seraphia_whisper: true } }]
+      },
+      E4_end: {
+        episode: 4, image: "nulbam",
+        text: "【4화 끝】\n세라피아 — 이름이 입안에서 굴러간다.",
+        choices: [{ text: "▶ 5화 시작", next: "E5_intro" }]
+      },
+
+      // --------- Episode 5: 별의 조각 (세라피아) ---------
+      E5_intro: {
+        episode: 5, image: "seraphia",
+        text:
+"빛이 모여 형상을 이룬다. 여신 세라피아가 눈을 뜬다.\n세라피아: 『그대, 별을 잃었구나. 묻겠다 — 빛을 되찾을 뜻이 있는가?』",
+        choices: [
+          { text: "예. 제 별을 되찾겠습니다.", next: "E5_oath", setFlag: { will_reclaim: true }, affection: { seraphia: 1 } },
+          { text: "아직 모르겠습니다.", next: "E5_doubt" }
+        ]
+      },
+      E5_oath: {
+        episode: 5, image: "seraphia",
+        text:
+"세라피아: 『서약에는 대가가 따른다. 그대 곁의 누군가의 밤을 이해해야 한다.』",
+        choices: [{ text: "서약을 듣고 고개를 끄덕인다", next: "E5_end", setFlag: { oath_hint: true } }]
+      },
+      E5_doubt: {
+        episode: 5, image: "seraphia",
+        text:
+"세라피아: 『머무르지 마라. 밤은 흐른다.』\n그러나 그녀의 눈빛은 다정했다.",
+        choices: [{ text: "다음", next: "E5_end" }]
+      },
+      E5_end: {
+        episode: 5, image: "nulbam",
+        text: "【5화 끝】\n서약. 그리고 대가.",
+        choices: [{ text: "▶ 6화 시작", next: "E6_intro" }]
+      },
+
+      // --------- Episode 6: 균열 (루트 선택) ---------
+      E6_intro: {
+        episode: 6, image: "nulbam",
+        text:
+"갈라지는 길. 엘리시아는 규율을, 루나는 공감을 말한다.\n누구와 밤을 건널 것인가?",
+        choices: [
+          { text: "엘리시아와 함께한다", next: "E6_choose_elysia", setRoute: "elysia", affection: { elysia: 1 } },
+          { text: "루나와 함께한다", next: "E6_choose_luna", setRoute: "luna", affection: { luna: 1 } },
+          { text: "혼자 가겠다", next: "E6_choose_solo", setRoute: "solo" }
+        ]
+      },
+      E6_choose_elysia: {
+        episode: 6, image: "elysia",
+        text: "엘리시아: \"좋아요. 빛은 함께일 때 더 단단해져요.\"",
+        choices: [{ text: "다음", next: "E6_end" }]
+      },
+      E6_choose_luna: {
+        episode: 6, image: "luna",
+        text: "루나: \"괜찮아. 네 밤을 지킬게. 우리가 함께라면.\"",
+        choices: [{ text: "다음", next: "E6_end" }]
+      },
+      E6_choose_solo: {
+        episode: 6, image: "nulbam",
+        text: "나는 홀로 선다. 밤은 차갑지만, 별은 홀로 떠오르기도 한다.",
+        choices: [{ text: "다음", next: "E6_end" }]
+      },
+      E6_end: {
+        episode: 6, image: "nulbam",
+        text: "【6화 끝】\n선택은 이루어졌다.",
+        choices: [{ text: "▶ 7화 시작", next: "E7_intro" }]
+      },
+
+      // --------- Episode 7: 루트 분기 시작 ---------
+      E7_intro: {
+        episode: 7,
+        image: null,
+        text: "당신의 선택에 따라 다른 밤이 열린다.",
+        choices: [
+          { text: "계속…", next: "E7_branch" }
+        ]
+      },
+      E7_branch: {
+        episode: 7,
+        image: null,
+        text: "…",
+        choices: [] // runtime에서 route에 따라 덮어쓰기
+      },
+
+      // ----- Luna Route 7~8 -----
+      L7_contract: {
+        episode: 7, image: "luna",
+        text:
+"루나: \"별을 되찾는 방법이 있어. 하지만… 네 일부를 나눠줘야 해.\"\n그녀의 눈동자엔 슬픔과 결의가 함께 비친다.",
+        choices: [
+          { text: "내 일부를 내어준다 (신뢰)", next: "L7_trust", affection: { luna: 2 }, setFlag: { luna_trust: true } },
+          { text: "그럴 순 없어 (거부)", next: "L7_refuse", affection: { luna: -1 } }
+        ]
+      },
+      L7_trust: {
+        episode: 7, image: "luna",
+        text: "루나: \"…고마워. 그 믿음, 내가 지켜줄게.\"",
+        choices: [{ text: "다음", next: "L8_dark_path" }]
+      },
+      L7_refuse: {
+        episode: 7, image: "luna",
+        text: "루나: \"미안해. 억지로는 아무것도 되찾을 수 없어.\"",
+        choices: [{ text: "다음", next: "L8_dark_path" }]
+      },
+      L8_dark_path: {
+        episode: 8, image: "luna",
+        text:
+"밤의 길을 걷는다. 검은 별이 호흡한다.\n루나: \"두려워도 괜찮아. 너는 너니까.\"",
         choices: [{ text: "다음", next: "E8_end" }]
       },
+
+      // ----- Elysia Route 7~8 -----
+      ELY7_trial: {
+        episode: 7, image: "elysia",
+        text:
+"엘리시아: \"규율의 시험을 통과해야 해요. 진실과 책임 — 두 가지 모두.\"",
+        choices: [
+          { text: "진실을 택한다", next: "ELY7_truth", affection: { elysia: 2 }, setFlag: { elysia_truth: true } },
+          { text: "책임을 택한다", next: "ELY7_duty", affection: { elysia: 1 }, setFlag: { elysia_duty: true } }
+        ]
+      },
+      ELY7_truth: {
+        episode: 7, image: "elysia",
+        text: "엘리시아: \"거짓 없는 빛은 멀리 비추죠.\"",
+        choices: [{ text: "다음", next: "ELY8_ritual" }]
+      },
+      ELY7_duty: {
+        episode: 7, image: "elysia",
+        text: "엘리시아: \"책임은 무겁지만, 그래서 존중받아요.\"",
+        choices: [{ text: "다음", next: "ELY8_ritual" }]
+      },
+      ELY8_ritual: {
+        video: "videos/rite_of_light.mp4",
+        episode: 8, image: "elysia",
+        text:
+"빛의 의식이 시작된다. 맥박처럼 고른 호흡.\n엘리시아: \"당신의 별, 함께 되찾아요.\"",
+        choices: [{ text: "다음", next: "E8_end" }]
+      },
+
+      // ----- Solo Route 7~8 -----
+      S7_solo: {
+        episode: 7, image: "nulbam",
+        text:
+"홀로 걷는 밤. 그러나 발걸음은 흔들리지 않는다.\n나는 나의 방식으로 답을 찾겠다.",
+        choices: [{ text: "다음", next: "S8_echo" }]
+      },
+      S8_echo: {
+        episode: 8, image: "nulbam",
+        text:
+"검은 별의 메아리가 가슴을 울린다. 그 속에는 내 목소리가 있었다.\n‘널 믿어.’",
+        choices: [{ text: "다음", next: "E8_end" }]
+      },
+
+      // --------- Episode 8 End / Episode 9 Begin ---------
       E8_end: {
-        text: "🌠 빛이 사라지고, 별이 다시 태어났다...",
-        image: "elysia",
-        choices: []
+        episode: 8, image: "nulbam",
+        text: "【8화 끝】\n시련의 밤이 끝나고, 선택은 모였다.",
+        choices: [{ text: "▶ 9화 시작", next: "E9_intro" }]
+      },
+
+      // --------- Episode 9: 선택의 밤 (합류) ---------
+      E9_intro: {
+        episode: 9, image: "seraphia",
+        text:
+"세라피아: 『마지막 밤. 너의 별은 너 혼자만의 것이 아니다. 그 빛이 닿을 사람을 생각하라.』",
+        choices: [
+          { text: "나의 빛을 나누겠다 (이타)", next: "E9_share", setFlag: { altruism: true } },
+          { text: "먼저 나를 완성하겠다 (자기회복)", next: "E9_self", setFlag: { self_first: true } }
+        ]
+      },
+      E9_share: {
+        episode: 9, image: "seraphia",
+        text: "세라피아: 『그 선택, 결코 가볍지 않다. 그러나 빛은 분기(分岐)에서 강해진다.』",
+        choices: [{ text: "다음", next: "E9_gate" }]
+      },
+      E9_self: {
+        episode: 9, image: "seraphia",
+        text: "세라피아: 『너의 상처를 먼저 감싸는 것 또한 용기다.』",
+        choices: [{ text: "다음", next: "E9_gate" }]
+      },
+      E9_gate: {
+        episode: 9, image: "seraphia",
+        text:
+"문 앞에 선다. 문은 당신의 선택과 호감, 서약을 모두 기억한다.",
+        choices: [{ text: "문을 연다", next: "E10_check" }]
+      },
+
+      // --------- Episode 10: 별빛 아래의 서약 (엔딩 체크) ---------
+      E10_check: {
+        episode: 10, image: "seraphia",
+        text: "별빛이 몰려든다. — 이제, 결말을 맞을 시간.",
+        choices: [{ text: "결말을 맞는다", next: "ENDING_COMPUTE" }]
+      },
+
+      // --------- Endings (렌더 후 고정) ---------
+      END_TRUE: {
+        episode: 10, image: "seraphia",
+        text:
+"【진엔딩】 별빛 아래의 서약\n\n너와 그들이 나눈 신뢰와 책임, 이해와 용기.\n세라피아: 『너의 밤은 이제 별이 되었다. 함께 비춰라.』",
+        choices: [
+          { text: "처음으로", next: "E1_intro" }
+        ]
+      },
+      END_ELYSIA: {
+        episode: 10, image: "elysia",
+        text:
+"【엘리시아 엔딩】 빛의 의식\n\n엘리시아: \"당신의 별은 단단해졌어요. 함께라면, 더 멀리.\"",
+        choices: [{ text: "처음으로", next: "E1_intro" }]
+      },
+      END_LUNA: {
+        episode: 10, image: "luna",
+        text:
+"【루나 엔딩】 밤의 안쪽\n\n루나: \"두려워도 괜찮아. 넌 네 별을 되찾았어. 난, 네 옆에.\"",
+        choices: [{ text: "처음으로", next: "E1_intro" }]
+      },
+      END_SOLO: {
+        episode: 10, image: "nulbam",
+        text:
+"【솔로 엔딩】 나의 별\n\n홀로 걷는 밤 끝에서, 너는 네 목소리를 들었다.\n그 목소리는 조용했고, 그래서 강했다.",
+        choices: [{ text: "처음으로", next: "E1_intro" }]
+      },
+      END_BAD: {
+        episode: 10, image: "nulbam",
+        text:
+"【배드 엔딩】 꺼진 별\n\n선택은 흩어졌고, 빛은 닿지 못했다.\n그러나 기억하라 — 밤은 언제나 다시 온다.",
+        choices: [{ text: "처음으로", next: "E1_intro" }]
       }
     };
+
+    // 루트 분기 장면을 런타임에 주입
+    function ensureBranchScenes() {
+      if (state.route === "luna") {
+        scenes.E7_branch.image = "luna";
+        scenes.E7_branch.text = "루나의 밤이 너를 부른다.";
+        scenes.E7_branch.choices = [{ text: "루나의 제안을 듣는다", next: "L7_contract" }];
+      } else if (state.route === "elysia") {
+        scenes.E7_branch.image = "elysia";
+        scenes.E7_branch.text = "엘리시아의 빛이 너를 이끈다.";
+        scenes.E7_branch.choices = [{ text: "엘리시아의 시험을 따른다", next: "ELY7_trial" }];
+      } else { // solo
+        scenes.E7_branch.image = "nulbam";
+        scenes.E7_branch.text = "너는 홀로 선다. 그러나 별은 홀로 떠오르기도 한다.";
+        scenes.E7_branch.choices = [{ text: "혼자 길을 연다", next: "S7_solo" }];
+      }
+    }
+
+    // 엔딩 계산
+    function computeEndingKey() {
+      const E = state.affection.elysia;
+      const L = state.affection.luna;
+      const S = state.affection.seraphia;
+      const f = state.flags;
+
+      const hasLibrary = !!(f.library_read || f.seraphia_whisper);
+      const oathAware = !!f.oath_hint;
+      const altru = !!f.altruism;
+      const selfFirst = !!f.self_first;
+
+      // 진엔딩 조건: 루트 유효 + 해당 인물 호감 충분 + 도서관 단서 + 서약 인지 + 이타 혹은 책임 선택이 조합
+      const routeGood =
+        (state.route === "elysia" && (E >= 4) && (f.elysia_truth || f.elysia_duty)) ||
+        (state.route === "luna" && (L >= 4) && (f.luna_trust));
+
+      if (routeGood && hasLibrary && oathAware && (altru || f.elysia_duty)) {
+        return "END_TRUE";
+      }
+
+      // 캐릭터 엔딩
+      if (state.route === "elysia" && E >= 3) return "END_ELYSIA";
+      if (state.route === "luna" && L >= 3) return "END_LUNA";
+      if (state.route === "solo" && selfFirst) return "END_SOLO";
+
+      // 실패 / 불충분
+      return "END_BAD";
+    }
 
     function showScene(name) {
       const scene = scenes[name];
       if (!scene) return;
-      dialogueBox.textContent = scene.text;
-      choicesBox.innerHTML = "";
-      characterBox.innerHTML = "";
 
-      if (scene.video) {
-        characterBox.innerHTML = `
-          <video width="640" autoplay controls>
-            <source src="${scene.video}" type="video/mp4">
-            Your browser does not support the video tag.
-          </video>`;
-      } else if (scene.image) {
-        characterBox.innerHTML = `<img src="images/${scene.image}.png" alt="${scene.image}">`;
+      // 유지
+      state.scene = name;
+      if (scene.episode) {
+        state.episode = scene.episode;
+        setEpisode(scene.episode);
       }
 
+      // 이미지
+      setImage(scene.image);
+
+      // 텍스트 출력 (타자 효과)
+      typeText(scene.text);
+
+      // 선택지 랜더
+      choicesBox.innerHTML = "";
       scene.choices.forEach(choice => {
         const btn = document.createElement("button");
         btn.textContent = choice.text;
         btn.classList.add("choice-btn");
-        btn.onclick = () => showScene(choice.next);
+        btn.onclick = () => {
+          // 애정도/플래그/루트 처리
+          applyAffection(choice.affection);
+          applyFlags(choice.setFlag, choice.unsetFlag);
+          if (choice.setRoute) state.route = choice.setRoute;
+
+          // 특수 목적지
+          if (choice.next === "ENDING_COMPUTE") {
+            const key = computeEndingKey();
+            showScene(key);
+            updateStatus();
+            return;
+          }
+
+          // 루트 분기 보정
+          if (choice.next === "E7_branch") {
+            ensureBranchScenes();
+          }
+
+          showScene(choice.next);
+          updateStatus();
+        };
         choicesBox.appendChild(btn);
       });
+
+      updateStatus();
     }
 
-    showScene("intro");
+    // 초기 시작
+    showScene(state.scene);
   </script>
 </body>
 </html>
+
+
+
+<script>
+const dialogueBox = document.getElementById("dialogue");
+const choicesBox = document.getElementById("choices");
+const characterBox = document.getElementById("character");
+
+function showScene(name) {
+  const scene = scenes[name];
+  if (!scene) return;
+
+  dialogueBox.textContent = scene.text;
+  choicesBox.innerHTML = "";
+  characterBox.innerHTML = "";
+
+  // 🔹 영상 지원 추가
+  if (scene.video) {
+    characterBox.innerHTML = `
+      <video width="640" autoplay controls>
+        <source src="${scene.video}" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>`;
+  } else if (scene.image) {
+    characterBox.innerHTML = `<img src="images/${scene.image}.png" alt="${scene.image}">`;
+  }
+
+  scene.choices.forEach(choice => {
+    const btn = document.createElement("button");
+    btn.textContent = choice.text;
+    btn.classList.add("choice-btn");
+    btn.onclick = () => showScene(choice.next);
+    choicesBox.appendChild(btn);
+  });
+}
+
+showScene("intro");
+</script>
