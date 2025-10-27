@@ -31,7 +31,7 @@
     }
     #game {
       width: min(960px, 100%);
-      background: var(--panel); 
+      background: var(--panel);
       border-radius: 16px;
       padding: 20px;
       box-shadow: var(--shadow);
@@ -225,16 +225,34 @@
     }
 
     // ---------- Utils ----------
-    function setImage(key) {
+  // ---------- Utils ----------
+  function setImage(key) {
       characterBox.innerHTML = "";
       if (!key) return;
-      const img = document.createElement("img");
-      img.src = `images/${key}.png`;
-      img.alt = key;
-      characterBox.appendChild(img);
-      // fade-in
-      requestAnimationFrame(() => img.classList.add("show"));
+
+      // 비디오 확장자인지 확인
+      const isVideo = key.endsWith(".mp4") || key.endsWith(".webm");
+
+      if (isVideo) {
+        const vid = document.createElement("video");
+        vid.src = `videos/${key}`;
+        vid.autoplay = true;
+        vid.loop = true;
+        vid.muted = true;
+        vid.playsInline = true;
+        vid.style.maxWidth = "100%";
+        vid.style.maxHeight = "100%";
+        vid.style.borderRadius = "12px";
+        characterBox.appendChild(vid);
+      } else {
+        const img = document.createElement("img");
+        img.src = `images/${key}.png`;
+        img.alt = key;
+        characterBox.appendChild(img);
+        requestAnimationFrame(() => img.classList.add("show"));
+      }
     }
+
 
     function setEpisode(num) {
       episodeEl.textContent = `Episode ${num}`;
@@ -596,8 +614,7 @@
         choices: [{ text: "다음", next: "ELY8_ritual" }]
       },
       ELY8_ritual: {
-        video: "videos/rite_of_light.mp4",
-        episode: 8, image: "elysia",
+        episode: 8, image: "rite_of_light.mp4",
         text:
 "빛의 의식이 시작된다. 맥박처럼 고른 호흡.\n엘리시아: \"당신의 별, 함께 되찾아요.\"",
         choices: [{ text: "다음", next: "E8_end" }]
@@ -796,42 +813,3 @@
   </script>
 </body>
 </html>
-
-
-
-<script>
-const dialogueBox = document.getElementById("dialogue");
-const choicesBox = document.getElementById("choices");
-const characterBox = document.getElementById("character");
-
-function showScene(name) {
-  const scene = scenes[name];
-  if (!scene) return;
-
-  dialogueBox.textContent = scene.text;
-  choicesBox.innerHTML = "";
-  characterBox.innerHTML = "";
-
-  // 🔹 영상 지원 추가
-  if (scene.video) {
-    characterBox.innerHTML = `
-      <video width="640" autoplay controls>
-        <source src="${scene.video}" type="video/mp4">
-        Your browser does not support the video tag.
-      </video>`;
-  } else if (scene.image) {
-    characterBox.innerHTML = `<img src="images/${scene.image}.png" alt="${scene.image}">`;
-  }
-
-  scene.choices.forEach(choice => {
-    const btn = document.createElement("button");
-    btn.textContent = choice.text;
-    btn.classList.add("choice-btn");
-    btn.onclick = () => showScene(choice.next);
-    choicesBox.appendChild(btn);
-  });
-}
-
-showScene("intro");
-</script>
-
